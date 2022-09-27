@@ -15,5 +15,6 @@ artifacts
 cache
 dist/
 typechain/
+typechain-types
 .env
 foundry_artifacts
