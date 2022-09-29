@@ -6,7 +6,7 @@ import "./PhatRollupReceiver.sol";
 
 contract Ask is PhatRollupReceiver, AskReply, Ownable {
 
-    /// @dev indecate req count
+    /// @dev indicate req count
     uint next = 0;
 
     /// @dev Hash of expected reply parameters are kept to verify that
