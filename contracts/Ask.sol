@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Interfaces.sol";
 import "./PhatRollupReceiver.sol";
 
 contract Ask is PhatRollupReceiver, AskReply, Ownable {
-    using ECDSA for bytes32;
 
     /// @dev indecate req count
     uint next = 0;
