@@ -53,7 +53,7 @@ contract FootballGame is Ownable {
         c.ask(anchor, address(this), this.anything.selector, parameters);
     }
 
-    function anything(bytes calldata data) public {
+    function anything(bytes calldata data) public onlyOwner {
         // decode the data here
         result = abi.decode(data, (uint));
         // anything following
