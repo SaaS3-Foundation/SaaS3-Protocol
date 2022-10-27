@@ -18,3 +18,4 @@ typechain/
 typechain-types
 .env
 foundry_artifacts
+contracts/.deps
