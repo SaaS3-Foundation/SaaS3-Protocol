@@ -187,10 +187,14 @@ contract FootballGame is Ownable {
         protocol = _protocol;
     }
 
+    function set_parameter(uint match_id, bytes calldata parameter) public onlyOwner {
+        game_parameters[match_id] = parameter;
+    }
+
     function game_result(uint match_id) public onlyOwner {
         Ask c = Ask(protocol);
         bytes memory parameters = game_parameters[match_id];
-
+        require(parameters.length  != 0, "empty parameter, init or set it");
         c.ask(anchor, address(this), this.anything.selector, parameters);
     }
 
