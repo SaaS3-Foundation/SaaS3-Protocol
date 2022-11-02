@@ -96,6 +96,7 @@ contract FootballGame is Ownable, AutoCall {
     }
 
     function perform() external {
+        require(closed == true);
         modify();
         closed = false;
     }
