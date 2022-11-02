@@ -4,8 +4,9 @@
 pragma solidity 0.8.9;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Ask.sol";
+import "./AutoCallInterface.sol";
 
-contract FootballGame is Ownable {
+contract FootballGame is Ownable, AutoCall {
     /// @dev set it to public, so we can check it directly
     /// There are two teams in a single match
     /// home vs guest
@@ -19,6 +20,9 @@ contract FootballGame is Ownable {
 
     /// @dev phala anchor contract address
     address private anchor;
+
+    /// @dev to indicate whether to end the game
+    bool private closed = true;
 
     /// @dev mapping match id to static team parameters
     ///
@@ -73,9 +77,26 @@ contract FootballGame is Ownable {
 
     /// @dev callback fn for allowing protocol contract to set oracle result back
     function anything(bytes calldata data) public {
-        require(msg.sender == owner() || msg.sender == protocol, "Unauhtorized!");
+        require(
+            msg.sender == owner() || msg.sender == protocol,
+            "Unauhtorized!"
+        );
         // decode the data here
         result = abi.decode(data, (uint256));
         // anything following
+        closed = true;
+    }
+
+    function check() external view returns (bool needed) {
+        needed = closed;
+    }
+
+    function modify() private {
+        result = 110;
+    }
+
+    function perform() external {
+        modify();
+        closed = false;
     }
 }

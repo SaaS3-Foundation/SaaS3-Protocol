@@ -24,9 +24,9 @@ contract Ask is PhatRollupReceiver, AskReply, Ownable {
     /// contract address and fn selector should be passed in for callback
     function ask(
         address anchor,
-        address replyTo, // caller's address/ football gambling contract
-        bytes4 fn, // callback function
-        bytes calldata payload//request data
+        address replyTo,
+        bytes4 fn,
+        bytes calldata payload
     ) external override returns (uint askId) {
         // TODO check subscriber
 
