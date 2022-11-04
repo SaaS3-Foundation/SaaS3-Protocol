@@ -5,8 +5,9 @@ pragma solidity 0.8.9;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Ask.sol";
 import "./AutoCallInterface.sol";
+import "./Triggerable.sol";
 
-contract FootballGame is Ownable, AutoCall {
+contract FootballGame is Ownable, AutoCall, Triggerable {
     /// @dev set it to public, so we can check it directly
     /// There are two teams in a single match
     /// home vs guest
@@ -99,5 +100,52 @@ contract FootballGame is Ownable, AutoCall {
         require(closed == true);
         modify();
         closed = false;
+    }
+
+    function bytes32ToString(bytes32 _bytes32)
+        private
+        pure
+        returns (string memory)
+    {
+        uint8 i = 0;
+        while (i < 32 && _bytes32[i] != 0) {
+            i++;
+        }
+        bytes memory bytesArray = new bytes(i);
+        for (i = 0; i < 32 && _bytes32[i] != 0; i++) {
+            bytesArray[i] = _bytes32[i];
+        }
+        return string(bytesArray);
+    }
+
+    string public home;
+    string public guest;
+
+    function stringToBytes32(string memory source)
+        public
+        pure
+        returns (bytes32 result)
+    {
+        bytes memory tempEmptyStringTest = bytes(source);
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+
+        assembly {
+            result := mload(add(source, 32))
+        }
+    }
+
+    function triggle(bytes calldata data) external returns (bool) {
+        //(bytes32 _home, bytes32 _guest) = abi.decode(data, (bytes32, bytes32));
+        (string memory _home, string memory _guest) = abi.decode(
+            data,
+            (string, string)
+        );
+        bytes32 h = stringToBytes32(_home);
+        bytes32 g = stringToBytes32(_guest);
+        home = bytes32ToString(h);
+        guest = bytes32ToString(g);
+        return false;
     }
 }
