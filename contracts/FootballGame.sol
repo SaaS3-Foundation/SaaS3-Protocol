@@ -4,10 +4,10 @@
 pragma solidity 0.8.9;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Ask.sol";
-import "./AutoCallInterface.sol";
 import "./Triggerable.sol";
+import "./Interfaces.sol";
 
-contract FootballGame is Ownable, AutoCall, Triggerable {
+contract FootballGame is Ownable, Triggerable {
     /// @dev set it to public, so we can check it directly
     /// There are two teams in a single match
     /// home vs guest
@@ -28,12 +28,6 @@ contract FootballGame is Ownable, AutoCall, Triggerable {
     /// @dev mapping match id to static team parameters
     ///
     mapping(uint256 => bytes) game_parameters;
-
-    constructor(address _protocol, address _anchor) {
-        // init contract addresses
-        protocol = _protocol;
-        anchor = _anchor;
-    }
 
     /// @dev we should not hardcode anchor address in case of anchor contract upgrade
     function set_anchor(address _anchor) public onlyOwner {
@@ -62,28 +56,33 @@ contract FootballGame is Ownable, AutoCall, Triggerable {
     }
 
     /// @dev main procedure to call oracle service
-    function game_result() public onlyOwner {
+    function ask(bytes32 home, bytes32 guest) private {
+        // check _anchor
+        // check _protocol
         // init protocol contract
         Ask c = Ask(protocol);
 
         // these lines are demo code, so it's hardcoded
-        bytes memory parameters = encode_parameters(
-            bytes32("Qatar"),
-            bytes32("Ecuador")
-        );
+        bytes memory parameters = encode_parameters(home, guest);
 
         // do the request
-        c.ask(anchor, address(this), this.anything.selector, parameters);
+        c.ask(anchor, address(this), this.reply.selector, parameters);
     }
 
     /// @dev callback fn for allowing protocol contract to set oracle result back
-    function anything(bytes calldata data) public {
+    function reply(bytes calldata data) external {
         require(
             msg.sender == owner() || msg.sender == protocol,
             "Unauhtorized!"
         );
         // decode the data here
         result = abi.decode(data, (uint256));
+        if (result == 0) {
+            // home lost
+        }else {
+
+        }
+        // 结算逻辑
         // anything following
         closed = true;
     }
@@ -137,7 +136,6 @@ contract FootballGame is Ownable, AutoCall, Triggerable {
     }
 
     function triggle(bytes calldata data) external returns (bool) {
-        //(bytes32 _home, bytes32 _guest) = abi.decode(data, (bytes32, bytes32));
         (string memory _home, string memory _guest) = abi.decode(
             data,
             (string, string)
@@ -146,6 +144,8 @@ contract FootballGame is Ownable, AutoCall, Triggerable {
         bytes32 g = stringToBytes32(_guest);
         home = bytes32ToString(h);
         guest = bytes32ToString(g);
+        // request game result
+        ask(h, g);
         return false;
     }
 }

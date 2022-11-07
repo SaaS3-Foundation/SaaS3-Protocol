@@ -8,8 +8,7 @@ interface IPhatQueuedAnchor {
 interface AskReply {
     event Asked(
         address indexed anchor,
-        uint256 cnt,
-        uint256 chainId,
+        uint256 id,
         address questioner,
         address replyTo,
         bytes4 fn,
@@ -29,4 +28,9 @@ interface AskReply {
         bytes4 fn,
         bytes calldata payload
     ) external returns (uint askId);
+
+    function reply(uint256 id, bytes calldata data) external;
 }
+
+
+

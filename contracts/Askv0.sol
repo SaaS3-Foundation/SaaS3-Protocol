@@ -2,16 +2,11 @@
 pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Interfaces.sol";
-import "./PhatRollupReceiver.sol";
 
-contract Ask is PhatRollupReceiver, AskReply, Ownable {
+contract Ask is AskReply, Ownable {
 
     /// @dev indicate req count
-    uint next = 0;
-
-    /// @dev Hash of expected reply parameters are kept to verify that
-    /// the response will be done with the correct parameters.
-    mapping(uint => bytes32) private askIdToProof;
+    uint public next = 0;
 
     /// @dev mapping id to reply address and fn
     mapping(uint => address) private askIdToReplyTo;
@@ -40,58 +35,20 @@ contract Ask is PhatRollupReceiver, AskReply, Ownable {
         askIdToReplyTo[id] = replyTo;
         askIdToFn[id] = fn;
 
-        askIdToProof[id] = keccak256(abi.encodePacked(id, replyTo, fn));
-
-        IPhatQueuedAnchor(anchor).pushRequest(abi.encode(id, payload));
+        emit Asked (
+            anchor,
+            id,
+            address(this),
+            replyTo,
+            fn,
+            abi.encode(id, payload)
+        );
 
         next++;
         return id;
     }
 
-    function onPhatRollupReceived(address _from, bytes calldata payload)
-        public
-        override
-        returns (bytes4)
-    {
-
-        (
-            uint id,
-            bytes memory data
-        ) = abi.decode(payload, (uint, bytes));
-
-        address anchor = askIdToAnchor[id];
-
-        require(anchor == _from, "wrong msg sender");
-
-        address replyTo = askIdToReplyTo[id];
-        bytes4 fn = askIdToFn[id];
-
-
-        require(
-            keccak256(abi.encodePacked(replyTo, fn)) == askIdToProof[id],
-            "Invalid reply"
-        );
-
-        (bool ok, bytes memory ack) = replyTo.call(
-            abi.encodeWithSelector(fn, data)
-        );
-
-        delete askIdToProof[id];
-        delete askIdToReplyTo[id];
-        delete askIdToFn[id];
-
-        if (ok) {
-            emit Replied(_from, ack);
-        } else {
-            emit FailedReply(
-                _from,
-                "reply to caller contract fn failed"
-            );
-        }
-        return ROLLUP_RECEIVED;
-    }
-
-       function reply(uint256 id, bytes calldata payload) external override {
+    function reply(uint256 id, bytes calldata payload) external override {
 
         address replyTo = askIdToReplyTo[id];
         require(replyTo != address(0), "replyTo address not found");
@@ -99,16 +56,10 @@ contract Ask is PhatRollupReceiver, AskReply, Ownable {
         bytes4 fn = askIdToFn[id];
         require(fn != bytes4(0), "callback fn not found");
 
-        require(
-            keccak256(abi.encodePacked(replyTo, fn)) == askIdToProof[id],
-            "Invalid reply"
-        );
-
         (bool ok, bytes memory ack) = replyTo.call(
             abi.encodeWithSelector(fn, payload)
         );
 
-        delete askIdToProof[id];
         delete askIdToReplyTo[id];
         delete askIdToFn[id];
 
