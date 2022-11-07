@@ -87,20 +87,6 @@ contract FootballGame is Ownable, Triggerable {
         closed = true;
     }
 
-    function check() external view returns (bool needed) {
-        needed = closed;
-    }
-
-    function modify() private {
-        result = 110;
-    }
-
-    function perform() external {
-        require(closed == true);
-        modify();
-        closed = false;
-    }
-
     function bytes32ToString(bytes32 _bytes32)
         private
         pure
