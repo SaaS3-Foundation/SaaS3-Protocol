@@ -3,7 +3,7 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Interfaces.sol";
 
-contract Ask is AskReply, Ownable {
+contract Ask is IsAsking, Mo, Ownable {
 
     /// @dev indicate req count
     uint public next = 0;
@@ -23,9 +23,7 @@ contract Ask is AskReply, Ownable {
         bytes4 fn,
         bytes calldata payload
     ) external override returns (uint askId) {
-        // TODO check subscriber
 
-        require(anchor != address(0), "anchor address not set");
         require(
             replyTo != address(this),
             "replyTo address cannot be Ask contract"
@@ -41,14 +39,14 @@ contract Ask is AskReply, Ownable {
             address(this),
             replyTo,
             fn,
-            abi.encode(id, payload)
+            payload
         );
 
         next++;
         return id;
     }
 
-    function reply(uint256 id, bytes calldata payload) external override {
+    function reply(uint256 id, bytes calldata payload) external override onlyOwner {
 
         address replyTo = askIdToReplyTo[id];
         require(replyTo != address(0), "replyTo address not found");
@@ -63,14 +61,10 @@ contract Ask is AskReply, Ownable {
         delete askIdToReplyTo[id];
         delete askIdToFn[id];
 
-        address anchor = askIdToAnchor[id];
         if (ok) {
-            emit Replied(anchor, ack);
+            emit Replied(id, ack);
         } else {
-            emit FailedReply(
-                anchor,
-                "reply to caller contract fn failed"
-            );
+            emit ReplyFailed(id, "reply to caller contract fn failed");
         }
     }
 }

@@ -5,9 +5,9 @@ interface IPhatQueuedAnchor {
     function pushRequest(bytes memory data) external returns (uint256);
 }
 
-interface AskReply {
+interface IsAsking {
     event Asked(
-        address indexed anchor,
+        address anchor,
         uint256 id,
         address questioner,
         address replyTo,
@@ -15,10 +15,8 @@ interface AskReply {
         bytes payload
     );
 
-    event Replied(address indexed anchor, bytes data);
-
-    event FailedReply(
-        address indexed anchor,
+    event ReplyFailed(
+        uint256 id,
         string errmsg
     );
 
@@ -29,8 +27,29 @@ interface AskReply {
         bytes calldata payload
     ) external returns (uint askId);
 
+}
+
+interface Mo {
+    event Replied(uint256, bytes data);
+
     function reply(uint256 id, bytes calldata data) external;
 }
 
+interface Triggerable {
+    /// @dev this fn will be called when specific event happens
+    function triggle(bytes calldata data) external returns (bool retry);
+}
+
+interface AutoCall {
+  /**
+   * @return needed boolean to indicate whether to call the perfrom fn
+   */
+  function check() external returns (bool needed);
+
+  /**
+   * @dev do perform
+   */
+  function perform() external;
+}
 
 
