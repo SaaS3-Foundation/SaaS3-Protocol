@@ -66,7 +66,9 @@ contract Ask is PhatRollupReceiver, IsAsking, Ownable {
         );
 
         if (!ok) {
-            emit ReplyFailed(id, string(ack));
+            emit ReplyFailed(id, _from, replyTo, fn, string(ack), payload);
+        } else {
+            emit Replied(id, _from, replyTo, fn, payload);
         }
 
         delete askIdToReplyTo[id];

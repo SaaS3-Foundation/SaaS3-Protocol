@@ -27,11 +27,13 @@ contract FootballGame is Ownable, Triggerable, Utils {
     address private anchor;
 
     /// @dev we should not hardcode saas3 address in case of saas3 protocol contract upgrade
-    function set_oracle(address oracle_addr, address phat_anchor_addr) public onlyOwner {
+    function set_oracle(address oracle_addr, address phat_anchor_addr)
+        external
+        onlyOwner
+    {
         oracle = oracle_addr;
         anchor = phat_anchor_addr;
     }
-
 
     /// @dev main procedure to call oracle service
     function ask(bytes32 _home, bytes32 _guest) private {
@@ -41,16 +43,25 @@ contract FootballGame is Ownable, Triggerable, Utils {
         bytes memory parameters = super.encodeTeamNames(_home, _guest);
 
         // do the request
-        IsAsking(oracle).ask(anchor, address(this), this.reply.selector, parameters);
+        IsAsking(oracle).ask(
+            anchor,
+            address(this),
+            this.reply.selector,
+            parameters
+        );
     }
 
     /// @dev callback fn for allowing protocol contract to set oracle result back
     /// require to check the msg.sender
+
     function reply(bytes calldata data) external {
         require(
-            msg.sender == owner() || msg.sender == oracle ,
-            "Unauhtorized!"
+            msg.sender == owner() || msg.sender == oracle,
+            "Unauhtorized msg sender!"
         );
+
+        // meansing decode pending
+        result = 110;
 
         // decode your result data here
         result = abi.decode(data, (uint256));
@@ -60,9 +71,9 @@ contract FootballGame is Ownable, Triggerable, Utils {
 
         if (result == 0) {
             // home lost
-        }else if (result == 1) {
+        } else if (result == 1) {
             // home win
-        }else if (result == 2) {
+        } else if (result == 2) {
             // draw
         } else {
             // unexpected case

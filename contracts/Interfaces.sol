@@ -9,7 +9,6 @@ interface IsAsking {
     event Asked(
         address anchor,
         uint256 id,
-        address questioner,
         address replyTo,
         bytes4 fn,
         bytes payload
@@ -17,7 +16,19 @@ interface IsAsking {
 
     event ReplyFailed(
         uint256 id,
-        string errmsg
+        address replier,
+        address replyTo,
+        bytes4 fn,
+        string errmsg,
+        bytes payload
+    );
+
+    event Replied(
+        uint256 id,
+        address replier,
+        address replyTo,
+        bytes4 fn,
+        bytes data
     );
 
     function ask(
@@ -26,12 +37,9 @@ interface IsAsking {
         bytes4 fn,
         bytes calldata payload
     ) external returns (uint askId);
-
 }
 
 interface Mo {
-    event Replied(uint256, bytes data);
-
     function reply(uint256 id, bytes calldata data) external;
 }
 
@@ -41,15 +49,13 @@ interface Triggerable {
 }
 
 interface AutoCall {
-  /**
-   * @return needed boolean to indicate whether to call the perfrom fn
-   */
-  function check() external returns (bool needed);
+    /**
+     * @return needed boolean to indicate whether to call the perfrom fn
+     */
+    function check() external returns (bool needed);
 
-  /**
-   * @dev do perform
-   */
-  function perform() external;
+    /**
+     * @dev do perform
+     */
+    function perform() external;
 }
-
-
