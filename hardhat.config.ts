@@ -9,6 +9,10 @@ const config: HardhatUserConfig = {
       moon: {
         url: "https://rpc.api.moonbase.moonbeam.network",
         accounts: { mnemonic: MNEMONIC }
+      },
+      polygon: {
+        url: "https://polygon-rpc.com",
+        accounts: { mnemonic: MNEMONIC }
       }
   },
   solidity: '0.8.9'
