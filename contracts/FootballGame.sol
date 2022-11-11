@@ -26,13 +26,17 @@ contract FootballGame is Ownable, Triggerable, Utils {
     /// @dev phala anchor contract address
     address private anchor;
 
+    /// @dev saas3 schedule caller
+    address private autocaller;
+
     /// @dev we should not hardcode saas3 address in case of saas3 protocol contract upgrade
-    function set_oracle(address oracle_addr, address phat_anchor_addr)
+    function set_oracle(address oracle_addr, address phat_anchor_addr, address autocaller_addr)
         external
         onlyOwner
     {
         oracle = oracle_addr;
         anchor = phat_anchor_addr;
+        autocaller = autocaller_addr;
     }
 
     /// @dev main procedure to call oracle service
@@ -81,6 +85,7 @@ contract FootballGame is Ownable, Triggerable, Utils {
     }
 
     function triggle(bytes calldata data) external override returns (bool) {
+        require(msg.sender == owner() || msg.sender == autocaller, "Unauthorized msg sender!");
         // TODO optimize data format to get rid of conversion
         (string memory _home, string memory _guest) = abi.decode(
             data,
