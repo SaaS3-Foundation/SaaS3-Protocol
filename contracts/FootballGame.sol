@@ -57,7 +57,7 @@ contract FootballGame is Ownable, Triggerable, Utils {
     function reply(bytes calldata data) external {
         require(
             msg.sender == owner() || msg.sender == oracle,
-            "Unauhtorized msg sender!"
+            "Unauthorized msg sender!"
         );
 
         // meansing decode pending
