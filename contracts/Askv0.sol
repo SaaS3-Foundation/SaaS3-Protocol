@@ -55,7 +55,7 @@ contract Askv0 is IsAsking, Mo, Ownable {
         require(fn != bytes4(0), "callback fn not found");
 
         (bool ok, bytes memory ack) = replyTo.call(
-            abi.encodeWithSelector(fn, payload)
+            abi.encodeWithSelector(fn, id, payload)
         );
 
         // delete it anyway
