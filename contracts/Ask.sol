@@ -27,13 +27,17 @@ contract Ask is PhatRollupReceiver, IsAsking, Ownable {
         bytes4 fn,
         bytes calldata payload
     ) external override returns (uint askId) {
-        // TODO check subscriber
-
         require(anchor != address(0), "anchor address not set");
+        require(replyTo != address(0), "replyTo address not set");
         require(
             replyTo != address(this),
             "replyTo address cannot be Ask contract"
         );
+        require(
+            fn == bytes4(keccak256("reply(uint256,bytes)")),
+            "invalid callback fn"
+        );
+
         uint id = next;
 
         askIdToReplyTo[id] = replyTo;
@@ -62,7 +66,7 @@ contract Ask is PhatRollupReceiver, IsAsking, Ownable {
         bytes4 fn = askIdToFn[id];
 
         (bool ok, bytes memory ack) = replyTo.call(
-            abi.encodeWithSelector(fn, data)
+            abi.encodeWithSelector(fn, id, data)
         );
 
         if (!ok) {

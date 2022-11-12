@@ -22,10 +22,16 @@ contract Askv0 is IsAsking, Mo, Ownable {
         bytes4 fn,
         bytes calldata payload
     ) external override returns (uint askId) {
+        require(replyTo != address(0), "replyTo address not set");
         require(
             replyTo != address(this),
             "replyTo address cannot be Ask contract"
         );
+        require(
+            fn == bytes4(keccak256("reply(uint256,bytes)")),
+            "invalid callback fn"
+        );
+
         uint id = next;
 
         askIdToReplyTo[id] = replyTo;

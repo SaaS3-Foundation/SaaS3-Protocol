@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Utils.sol";
 import "./Interfaces.sol";
 
-contract FootballGame is Ownable, Triggerable, Utils {
+contract FootballGame is Ownable, Triggerable, Utils, Mo {
     /// @dev result, home, guest are only for test
     /// set them to public, so we can check directly
     /// There are two teams in a single match
@@ -29,11 +29,14 @@ contract FootballGame is Ownable, Triggerable, Utils {
     /// @dev saas3 schedule caller
     address private autocaller;
 
+    mapping(uint => uint) askIdToMatchId;
+
     /// @dev we should not hardcode saas3 address in case of saas3 protocol contract upgrade
-    function set_oracle(address oracle_addr, address phat_anchor_addr, address autocaller_addr)
-        external
-        onlyOwner
-    {
+    function set_oracle(
+        address oracle_addr,
+        address phat_anchor_addr,
+        address autocaller_addr
+    ) external onlyOwner {
         oracle = oracle_addr;
         anchor = phat_anchor_addr;
         autocaller = autocaller_addr;
@@ -44,25 +47,31 @@ contract FootballGame is Ownable, Triggerable, Utils {
         /// @dev anchor will check in oracle contract, we don't need to check it here
         require(oracle != address(0), "oracle address not set");
 
+        // get match id by home and guest team name
         bytes memory parameters = super.encodeTeamNames(_home, _guest);
 
         // do the request
-        IsAsking(oracle).ask(
+        uint askId = IsAsking(oracle).ask(
             anchor,
             address(this),
             this.reply.selector,
             parameters
         );
+        // mapping askId to match id
+        // demo code
+        askIdToMatchId[askId] = 110;
     }
 
     /// @dev callback fn for allowing protocol contract to set oracle result back
     /// require to check the msg.sender
 
-    function reply(bytes calldata data) external {
+    function reply(uint256 id, bytes calldata data) external override {
         require(
             msg.sender == owner() || msg.sender == oracle,
             "Unauthorized msg sender!"
         );
+
+        uint match_id = askIdToMatchId[id];
 
         // meansing decode pending
         result = 110;
@@ -85,7 +94,10 @@ contract FootballGame is Ownable, Triggerable, Utils {
     }
 
     function triggle(bytes calldata data) external override returns (bool) {
-        require(msg.sender == owner() || msg.sender == autocaller, "Unauthorized msg sender!");
+        require(
+            msg.sender == owner() || msg.sender == autocaller,
+            "Unauthorized msg sender!"
+        );
         // TODO optimize data format to get rid of conversion
         (string memory _home, string memory _guest) = abi.decode(
             data,
