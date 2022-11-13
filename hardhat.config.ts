@@ -11,7 +11,7 @@ const config: HardhatUserConfig = {
         accounts: { mnemonic: MNEMONIC }
       },
       polygon: {
-        url: "https://polygon-rpc.com",
+        url: "https://rpc.ankr.com/polygon",
         accounts: { mnemonic: MNEMONIC }
       }
   },
