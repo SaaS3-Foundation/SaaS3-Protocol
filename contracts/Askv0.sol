@@ -14,10 +14,9 @@ contract Askv0 is IsAsking, Mo, Ownable {
     /// @dev mapping anchor address, so we can use it to check the sender
     mapping(uint => address) private askIdToAnchor;
 
-    /// @dev ask fn will push request to PhatQueuedAnchor contract
     /// contract address and fn selector should be passed in for callback
     function ask(
-        address anchor,
+        address questionee,
         address replyTo,
         bytes4 fn,
         bytes calldata payload
@@ -37,7 +36,7 @@ contract Askv0 is IsAsking, Mo, Ownable {
         askIdToReplyTo[id] = replyTo;
         askIdToFn[id] = fn;
 
-        emit Asked(anchor, id, replyTo, fn, payload);
+        emit Asked(id, questionee, replyTo, fn, payload);
 
         next++;
         return id;
@@ -65,15 +64,15 @@ contract Askv0 is IsAsking, Mo, Ownable {
         delete askIdToFn[id];
 
         if (ok) {
-            emit Replied(id, address(this), replyTo, fn, payload);
+            emit Replied(id, msg.sender, replyTo, fn, payload);
         } else {
             emit ReplyFailed(
                 id,
-                address(this),
+                msg.sender,
                 replyTo,
                 fn,
-                string(ack),
-                payload
+                payload,
+                string(ack)
             );
         }
     }

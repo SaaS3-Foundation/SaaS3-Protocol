@@ -46,7 +46,7 @@ contract Utils {
         return string(bytesArray);
     }
 
-        function stringToBytes32(string memory source)
+    function stringToBytes32(string memory source)
         internal
         pure
         returns (bytes32 result)

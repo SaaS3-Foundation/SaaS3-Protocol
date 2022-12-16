@@ -22,12 +22,12 @@ contract Ask is PhatRollupReceiver, IsAsking, Ownable {
     /// @dev ask fn will push request to PhatQueuedAnchor contract
     /// contract address and fn selector should be passed in for callback
     function ask(
-        address anchor,
+        address questionee,
         address replyTo,
         bytes4 fn,
         bytes calldata payload
     ) external override returns (uint askId) {
-        require(anchor != address(0), "anchor address not set");
+        require(questionee != address(0), "questionee address not set");
         require(replyTo != address(0), "replyTo address not set");
         require(
             replyTo != address(this),
@@ -43,9 +43,9 @@ contract Ask is PhatRollupReceiver, IsAsking, Ownable {
         askIdToReplyTo[id] = replyTo;
         askIdToFn[id] = fn;
 
-        askIdToAnchor[id] = anchor;
+        askIdToAnchor[id] = questionee;
 
-        IPhatQueuedAnchor(anchor).pushRequest(abi.encode(id, payload));
+        IPhatQueuedAnchor(questionee).pushRequest(abi.encode(id, payload));
 
         next++;
         return id;
@@ -57,24 +57,28 @@ contract Ask is PhatRollupReceiver, IsAsking, Ownable {
         returns (bytes4)
     {
         (uint id, bytes memory data) = abi.decode(payload, (uint, bytes));
-
+        
         address anchor = askIdToAnchor[id];
 
         require(msg.sender == anchor, "wrong msg sender, not anchor!");
 
         address replyTo = askIdToReplyTo[id];
+        require(replyTo != address(0), "replyTo address not found");
+
         bytes4 fn = askIdToFn[id];
+        require(fn != bytes4(0), "callback fn not found");
 
         (bool ok, bytes memory ack) = replyTo.call(
             abi.encodeWithSelector(fn, id, data)
         );
 
         if (!ok) {
-            emit ReplyFailed(id, _from, replyTo, fn, string(ack), payload);
+            emit ReplyFailed(id, _from, replyTo, fn, data, string(ack));
         } else {
-            emit Replied(id, _from, replyTo, fn, payload);
+            emit Replied(id, _from, replyTo, fn, data);
         }
 
+        // delete it anyway
         delete askIdToReplyTo[id];
         delete askIdToFn[id];
 

@@ -7,8 +7,8 @@ interface IPhatQueuedAnchor {
 
 interface IsAsking {
     event Asked(
-        address anchor,
         uint256 id,
+        address questionee, // who is asked
         address replyTo,
         bytes4 fn,
         bytes payload
@@ -16,23 +16,23 @@ interface IsAsking {
 
     event ReplyFailed(
         uint256 id,
-        address replier,
-        address replyTo,
+        address replier, // who replied
+        address replyTo, // replied to who / who asked
         bytes4 fn,
-        string errmsg,
-        bytes payload
+        bytes payload,
+        string errmsg // msg from upstream replyTo contract
     );
 
     event Replied(
         uint256 id,
-        address replier,
-        address replyTo,
+        address replier, // who replied
+        address replyTo, // replied to who / who asked
         bytes4 fn,
-        bytes data
+        bytes payload
     );
 
     function ask(
-        address anchor,
+        address questionee,
         address replyTo,
         bytes4 fn,
         bytes calldata payload
