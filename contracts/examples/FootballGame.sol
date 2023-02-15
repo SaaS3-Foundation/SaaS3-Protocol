@@ -3,8 +3,8 @@
 // EDIT it to adapt to your own dAPI
 pragma solidity 0.8.9;
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./Utils.sol";
-import "./Interfaces.sol";
+import "../Utils.sol";
+import "../Interfaces.sol";
 
 contract FootballGame is Ownable, Triggerable, Utils, Mo {
     /// @dev result, home, guest are only for test

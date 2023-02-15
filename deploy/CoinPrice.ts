@@ -10,7 +10,7 @@ async function main() {
     const CoinPrice = await ethers.getContractFactory("CoinPrice");
     const coinPrice = await CoinPrice.deploy();
   
-    console.log("Ask contract address:", coinPrice.address);
+    console.log("CoinPrice contract address:", coinPrice.address);
 }
   
 main();

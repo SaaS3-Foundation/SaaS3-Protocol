@@ -3,8 +3,8 @@
 // EDIT it to adapt to your own dAPI
 pragma solidity 0.8.9;
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./Utils.sol";
-import "./Interfaces.sol";
+import "../Utils.sol";
+import "../Interfaces.sol";
 
 contract CoinPrice is Ownable, Utils, Mo {
     /// @dev result, set it to public, so we can check directly
@@ -34,19 +34,18 @@ contract CoinPrice is Ownable, Utils, Mo {
         /// @dev anchor will check in oracle contract, we don't need to check it here
         require(oracle != address(0), "oracle address not set");
 
-        // get match id by home and guest team name
         bytes memory parameters = abi.encode(
-                bytes32("1sss"),
+                bytes32("1sssss"),
                 bytes32("ids"),
-                "ethereum",
+                bytes32("ethereum"),
                 bytes32("vs_currencies"),
-               "usd",
+                bytes32("usd"),
                 bytes32("_path"), // _path, _type and _times are optional, you can set them in druntime side.
-                "ethereum.usd",
+                bytes32("ethereum.usd"),
                 bytes32("_type"),
-                "uint256",
+                bytes32("uint256"),
                 bytes32("_times"),
-                "100"
+                bytes32("100")
             );
 
         // do the request

@@ -19,6 +19,9 @@ contract Ask is PhatRollupReceiver, IsAsking, Ownable {
     /// @dev mapping anchor address, so we can use it to check the sender
     mapping(uint => address) private askIdToAnchor;
 
+    uint TYPE_RESPONSE = 0x01;
+    uint TYPE_ERROR = 0x03;
+
     /// @dev ask fn will push request to PhatQueuedAnchor contract
     /// contract address and fn selector should be passed in for callback
     function ask(
@@ -45,7 +48,9 @@ contract Ask is PhatRollupReceiver, IsAsking, Ownable {
 
         askIdToAnchor[id] = questionee;
 
-        IPhatQueuedAnchor(questionee).pushRequest(abi.encode(id, payload));
+        IPhatRollupAnchor(questionee).pushMessage(abi.encode(id, payload));
+
+        emit Asked(id, questionee, replyTo, fn, payload);
 
         next++;
         return id;
@@ -56,7 +61,8 @@ contract Ask is PhatRollupReceiver, IsAsking, Ownable {
         override
         returns (bytes4)
     {
-        (uint id, bytes memory data) = abi.decode(payload, (uint, bytes));
+        (uint rt, uint id, bytes memory data) = abi.decode(payload, (uint, uint, bytes));
+
         
         address anchor = askIdToAnchor[id];
 
@@ -67,6 +73,11 @@ contract Ask is PhatRollupReceiver, IsAsking, Ownable {
 
         bytes4 fn = askIdToFn[id];
         require(fn != bytes4(0), "callback fn not found");
+
+        if (rt == TYPE_ERROR) {
+            emit ReplyFailed(id, _from, replyTo, fn, new bytes(0x03), string(data));
+            return ROLLUP_RECEIVED;
+        } 
 
         (bool ok, bytes memory ack) = replyTo.call(
             abi.encodeWithSelector(fn, id, data)

@@ -7,10 +7,10 @@ async function main() {
 
     console.log("Account balance:", (await deployer.getBalance()).toString());
 
-    const CoinPrice = await ethers.getContractFactory("CoinPrice");
+    const CoinPrice= await ethers.getContractFactory("CoinPrice");
     const c = await CoinPrice.attach('0x7cAf6684538d6DfBfa72fA0f2cFb504059724A32');
     console.log("CoinPrice Contract address:", c.address);
-    await c.connect(deployer).set_oracle('0x03B456708e05B447d88Ae4EaC0A0afF66f8d166a', '0x3898186FA700920F423b64a2e51926Cc037049E7');
+    await c.connect(deployer).ask();
 }
 
 main();

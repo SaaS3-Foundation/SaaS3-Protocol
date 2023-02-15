@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.9;
 
-interface IPhatQueuedAnchor {
-    function pushRequest(bytes memory data) external returns (uint256);
+interface IPhatRollupAnchor {
+    function pushMessage(bytes memory data) external returns (uint32);
 }
 
 interface IsAsking {
     event Asked(
         uint256 id,
         address questionee, // who is asked
-        address replyTo,
+        address replyTo, // who is asking
         bytes4 fn,
         bytes payload
     );
@@ -32,8 +32,8 @@ interface IsAsking {
     );
 
     function ask(
-        address questionee,
-        address replyTo,
+        address questionee, // who is asked
+        address replyTo, // who is asking
         bytes4 fn,
         bytes calldata payload
     ) external returns (uint askId);

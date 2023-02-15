@@ -13,6 +13,12 @@ const config: HardhatUserConfig = {
       polygon: {
         url: "https://rpc.ankr.com/polygon",
         accounts: { mnemonic: MNEMONIC }
+      },
+      bnb: {
+        url: "https://bsc-dataseed.binance.org/",
+        accounts: { mnemonic: MNEMONIC },
+ gas: 2100000,
+      gasPrice: 8000000000
       }
   },
   solidity: '0.8.9'
